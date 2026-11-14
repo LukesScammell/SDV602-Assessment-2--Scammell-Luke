@@ -894,3 +894,90 @@ Expected result: Successful login opens the chat interface linked to the authent
 Actual result: The chat interface opened and was linked to the logged-in user.
 
 Status: Passed.
+
+## Development Entry 16 – 15 November 2026
+
+### Task: DES Session Management and Session-Based Chat
+
+**Work completed:**
+- Created a DES session model to represent individual sessions.
+- Implemented a MongoDB repository for creating, retrieving and deleting sessions.
+- Developed a session browser using FreeSimpleGUI.
+- Added functionality for users to create, browse, join and delete sessions.
+- Implemented ownership checks to prevent users from deleting sessions belonging to another account.
+- Updated the application flow to open the session browser after successful login.
+- Extended the chat message model and repository to associate messages with individual sessions.
+- Updated the chat controller to retrieve and send messages using the selected session ID.
+- Confirmed that session information and chat messages are stored persistently in MongoDB Atlas.
+
+### Challenges Encountered
+
+During implementation, the application initially failed to import PyMongo because the package was unavailable in the active Python environment. This was resolved by activating the virtual environment and installing the required dependency.
+
+The MongoDB connection string also needed to be configured using the `SDV602_MONGO_URI` environment variable.
+
+An error occurred when the chat controller passed a session ID to the message repository before its `all()` method had been updated to accept that argument.
+
+Another error occurred because the `document` variable was not defined correctly inside the message creation method. This was corrected before retesting.
+
+### Design Decisions
+
+The session management functionality was separated into model, repository, controller and view modules to maintain the existing application architecture.
+
+Each session is stored in MongoDB with a unique ID, name, owner, description and creation timestamp.
+
+Session deletion is restricted to the account that created the session.
+
+Chat messages now contain a session ID, allowing the application to retrieve only messages belonging to the selected DES session.
+
+Existing messages without a session ID were preserved in MongoDB rather than deleted.
+
+### Testing
+
+**Test 1: Session Creation**
+
+Expected result: A logged-in user can create a DES session that is stored in MongoDB.
+
+Actual result: Luke successfully created `test_session`, and its details appeared in MongoDB Compass.
+
+Status: Passed.
+
+**Test 2: Session Browsing and Joining**
+
+Expected result: Registered users can view and join existing DES sessions.
+
+Actual result: Both Luke and Bob could view the session, and joining opened the chat interface.
+
+Status: Passed.
+
+**Test 3: Session Ownership**
+
+Expected result: Users cannot delete sessions created by another account.
+
+Actual result: Bob was prevented from deleting Luke's session.
+
+Status: Passed.
+
+**Test 4: Session-Based Chat**
+
+Expected result: Users joining the same session can exchange messages using their registered usernames.
+
+Actual result: Luke and Bob successfully exchanged messages in the same session.
+
+Status: Passed.
+
+**Test 5: Chat Isolation**
+
+Expected result: Messages from one DES session do not appear in another session.
+
+Actual result: A second session displayed its own chat history without showing messages from `test_session`.
+
+Status: Passed.
+
+**Test 6: Chat Persistence**
+
+Expected result: Messages remain available after leaving and rejoining a session.
+
+Actual result: Previously sent messages were displayed when returning to the original session.
+
+Status: Passed.

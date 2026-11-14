@@ -1,7 +1,8 @@
-from data.database_manager import DatabaseManager
 from datetime import datetime
+
 import config
 
+from data.database_manager import DatabaseManager
 from model.chat_message import ChatMessage
 
 class MessageRepository:
@@ -9,25 +10,37 @@ class MessageRepository:
         self.db = DatabaseManager.getInstance()
 
 
-    def create_message(self, username, text, timestamp=None):
+    def create_message(self, username, text, session_id, timestamp=None):
+        if not session_id:
+            raise ValueError("A session ID is required.")
+
+        if not text.strip():
+            raise ValueError("Message cannot be empty.")
+
         if timestamp is None:
             timestamp = datetime.now()
-        else:
-            timestamp = timestamp
 
-        return self.db.insert_one(config.CHAT_MESSAGES_COLLECTION, {
-                "username": username,
-                "text": text,
-                "timestamp": timestamp
-        })
+        document = {
+            "username": username, 
+            "text": text.strip(), 
+            "timestamp": timestamp, 
+            "session_id": str(session_id),
+        }
 
-    def all(self):
+        return self.db.insert_one(config.CHAT_MESSAGES_COLLECTION, document)
+
+    def all(self, session_id):
+        if not session_id:
+            raise ValueError("A session ID is required.")
+
         collection = self.db.get_collection(config.CHAT_MESSAGES_COLLECTION)
+
+        documents = collection.find({"session_id": str(session_id),}).sort("timestamp", 1)
 
         messages = []
 
-        for document in collection.find().sort("timestamp"):
-            message = ChatMessage(document["username"], document["text"], document["timestamp"])
+        for document in documents:
+            message = ChatMessage(document["username"], document["text"], document["timestamp"], session_id=document["session_id"])
             messages.append(message)
 
         return messages
