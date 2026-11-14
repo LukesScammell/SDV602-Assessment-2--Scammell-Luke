@@ -16,7 +16,26 @@ class DataVisualiser:
 
         self.data = data
         return True
-        
+
+    def load_data(self, records):
+        """Replace the current dataset with supplied records."""
+        if not records:
+            print("No records provided.")
+            return False
+
+        if not all(isinstance(row, dict) for row in records):
+            print("Invalid dataset format.")
+            return False
+
+        columns = set(records[0].keys())
+
+        if not columns or any(set(row.keys()) != columns for row in records):
+            print("The dataset columns do not match.")
+            return False
+
+        self.data = [row.copy() for row in records]
+        return True   
+
     def read_csv_safely(self, file_name):
         """Read a CSV file and handle common file errors."""
         try:
@@ -155,12 +174,7 @@ class DataVisualiser:
             print("No data to plot!")
             return
 
-        figure = self.create_line_chart(
-            x_key,
-            y_key,
-            title,
-            series_key
-        )
+        figure = self.create_line_chart(x_key, y_key, title, series_key)
 
         if figure is not None:
             plt.show()

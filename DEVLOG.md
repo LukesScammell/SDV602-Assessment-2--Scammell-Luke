@@ -981,3 +981,96 @@ Expected result: Messages remain available after leaving and rejoining a session
 Actual result: Previously sent messages were displayed when returning to the original session.
 
 Status: Passed.
+
+## Development Entry 17 – 15 November 2026
+
+### Task: Remote Dataset Upload and Loading
+
+**Work completed:**
+- Created a `RemoteDataset` model to represent datasets stored in MongoDB Atlas.
+- Implemented `DatasetRepository` to upload, retrieve and browse datasets.
+- Associated each dataset with a DES session using its unique session ID.
+- Added a `load_data()` method to `DataVisualiser` to support records retrieved from MongoDB without requiring a local CSV file.
+- Created a remote dataset browser using FreeSimpleGUI.
+- Implemented CSV uploads from the user's computer to MongoDB Atlas.
+- Added functionality for users to browse and load datasets associated with their selected DES session.
+- Integrated the existing Matplotlib graph functionality with remotely stored datasets.
+- Updated the application workflow to open the dataset browser after joining a DES session.
+- Added file-size checks before uploading datasets.
+- Tested remote dataset sharing between two registered accounts.
+
+### Challenges Encountered
+
+**Integrating remote datasets with the existing visualiser**
+
+The original `DataVisualiser` was designed to load CSV files directly from the computer. MongoDB returns dataset records as Python dictionaries, so a new `load_data()` method was implemented to accept these records without changing the existing CSV loading functionality.
+
+**FreeSimpleGUI file selection warning**
+
+During testing, FreeSimpleGUI displayed a warning because the `file_types` argument was not supplied in its expected format. The argument was corrected to use a list of tuples.
+
+**Maintaining the existing application workflow**
+
+The remote dataset browser needed to be integrated without affecting registration, login, session management or session-based chat. The application was updated so users can select a session, access its datasets and then continue to the chat interface.
+
+### Design Decisions
+
+**Repository-based database access**
+
+Dataset storage and retrieval were implemented in `DatasetRepository`, keeping MongoDB operations separate from the GUI and controller logic.
+
+**Session-specific datasets**
+
+Each uploaded dataset includes the ID of its DES session. This allows users in the same session to access shared datasets while keeping datasets from different sessions separate.
+
+**Reusing the existing DataVisualiser**
+
+Instead of creating a separate graphing system for Remote Mode, the existing `DataVisualiser` was extended to accept remotely retrieved records. This reduces duplicated code and maintains consistency between Local Mode and Remote Mode.
+
+**File-size validation**
+
+CSV file-size checks were introduced to reduce the risk of uploading files that exceed MongoDB's document-size limit.
+
+**Sequential application workflow**
+
+The dataset browser currently opens before the chat interface. This provides working remote dataset functionality while leaving simultaneous session operation and threading for a later development stage.
+
+### Testing
+
+**Test 1: Load Data from Python Dictionaries**
+
+Expected result: `DataVisualiser` accepts records without reading a CSV file and generates the correct dataset description.
+
+Actual result: Two records were successfully loaded, with the correct column names and numerical statistics.
+
+Status: Passed.
+
+**Test 2: Upload CSV to MongoDB Atlas**
+
+Expected result: The application uploads a CSV dataset and stores it in the `data_sources` collection.
+
+Actual result: The test CSV uploaded successfully and MongoDB generated a dataset ID.
+
+Status: Passed.
+
+**Test 3: Retrieve Remote Dataset**
+
+Expected result: A dataset can be retrieved from MongoDB using its dataset ID and session ID.
+
+Actual result: The uploaded dataset was successfully retrieved with all 15 records.
+
+Status: Passed.
+
+**Test 4: Remote Dataset Browser**
+
+Expected result: After joining a DES session, users can browse datasets associated with that session.
+
+Actual result: The dataset browser opened successfully and displayed the previously uploaded dataset.
+
+Status: Passed.
+
+**Test 5: Remote Graph Loading**
+
+Expected result: Users can select a remote dataset and display its records using Matplotlib.
+
+Actual result: Remote
