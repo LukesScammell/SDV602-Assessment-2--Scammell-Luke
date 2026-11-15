@@ -28,12 +28,7 @@ class LocalGUI:
             [sg.Canvas(key="-CANVAS-", size=(760, 350))]
         ]
 
-        self.window = sg.Window(
-            "SDV602 - Local Data Explorer",
-            self.layout,
-            size=(850, 650),
-            finalize=True
-        )
+        self.window = sg.Window("SDV602 - Local Data Explorer", self.layout, size=(850, 650), finalize=True)
 
     def clear_graph(self):
         """Remove the currently displayed graph."""
@@ -64,33 +59,21 @@ class LocalGUI:
         x_default = "Period" if "Period" in columns else columns[0]
         y_default = "Count" if "Count" in columns else columns[-1]
 
-        self.window["-X-COLUMN-"].update(
-            values=columns,
-            value=x_default,
-        )
-
-        self.window["-Y-COLUMN-"].update(
-            values=columns,
-            value=y_default,
-        )
+        self.window["-X-COLUMN-"].update(values=columns, value=x_default)
+        self.window["-Y-COLUMN-"].update(values=columns, value=y_default)
         
     def update_dataset_description(self):
         """Display information about the currently loaded dataset."""
         description = self.visualiser.get_dataset_description()
 
         if description["records"] == 0: 
-            self.window["-DESCRIPTION-"].update(
-                "No dataset information available."
-            ) 
+            self.window["-DESCRIPTION-"].update("No dataset information available.") 
             return
 
         records = description["records"]
         columns = ", ".join(description["columns"])
 
-        lines = [
-            f"Total records: {records}", 
-            f"Columns: {columns}"
-        ]
+        lines = [f"Total records: {records}", f"Columns: {columns}"]
 
         for column, stats in description["statistics"].items():
             lines.append(f"{column}: "
@@ -101,15 +84,14 @@ class LocalGUI:
         
         self.window["-DESCRIPTION-"].update("\n".join(lines)) 
 
-    def load_csv(self):
-        """Allow the user to select and load a CSV file."""
-        file_name = sg.popup_get_file(
-            "Select a CSV file",
-            file_types=(("CSV Files", "*.csv"),)
-        )
+    
+    def load_csv(self, file_name=None):
+        """Load a CSV file from the CLI or file selection popup."""
+        if file_name is None:
+            file_name = sg.popup_get_file("Select a CSV file", file_types=(("CSV Files", "*.csv")))
 
         if not file_name:
-            return
+            return False
 
         if self.visualiser.load_csv(file_name):
             records = len(self.visualiser.get_data())
@@ -120,8 +102,12 @@ class LocalGUI:
             self.update_column_selection()
 
             self.window["-STATUS-"].update(f"Successfully loaded {records} records.")
-        else:
-            sg.popup_error("Unable to load the selected CSV file.")
+            return True
+
+        sg.popup_error(f"Unable to load CSV file:\n{file_name}")
+        self.window["-STATUS-"].update("Unable to load CSV file.")
+        return False
+
 
     def append_csv(self):
         """Append records from another CSV file to the current dataset."""
@@ -129,10 +115,7 @@ class LocalGUI:
             sg.popup_error("Please load a CSV file before appending data.")
             return
 
-        file_name = sg.popup_get_file(
-            "Select a CSV file to append",
-            file_types=(("CSV Files", "*.csv"),)
-        )
+        file_name = sg.popup_get_file("Select a CSV file to append", file_types=(("CSV Files", "*.csv")))
 
         if not file_name:
             return
@@ -142,9 +125,7 @@ class LocalGUI:
 
             self.clear_graph()
             self.update_dataset_description()
-            self.window["-STATUS-"].update(
-                f"CSV appended successfully. Total records: {records}."
-            )
+            self.window["-STATUS-"].update(f"CSV appended successfully. Total records: {records}.")
         else:
             sg.popup_error("Unable to append CSV. Check that the columns match.")
 

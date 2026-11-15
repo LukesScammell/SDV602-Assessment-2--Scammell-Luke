@@ -4,7 +4,7 @@ from view.workspace_view import WorkspaceView
 from controller.des_controller import DesController
 
 class WorkspaceController:
-    def __init__(self, username, session_repository, dataset_repository, message_repository):
+    def __init__(self, username, session_repository, dataset_repository, message_repository, initial_session_id=None):
         self.username = username
         self.session_repository = session_repository
         self.dataset_repository = dataset_repository
@@ -13,22 +13,52 @@ class WorkspaceController:
         self.view = WorkspaceView(username)
         self.sessions = []
         self.active_des = {}
+        self.initial_session_id = initial_session_id
 
     def refresh_sessions(self):
         self.sessions = self.session_repository.all()
         self.view.update_sessions(self.sessions)
     
     def get_selected_session(self, values):
+        """Return the session selected in the workspace."""
         if not values["-SESSIONS-"]:
             sg.popup_error("Please select a session.")
             return None
 
         indexes = self.view.window["-SESSIONS-"].get_indexes()
-        
+
         if not indexes:
             return None
 
         return self.sessions[indexes[0]]
+    
+    def open_initial_session(self):
+        """Open a requested DES session after successful login."""
+        if self.initial_session_id is None:
+            return
+
+        session = self.session_repository.find_by_id(self.initial_session_id)
+
+        if session is None:
+            sg.popup_error(
+                "The requested DES session does not exist "
+                "or the session ID is invalid."
+            )
+            return
+
+        self.open_des_session(session)
+        
+        def get_selected_session(self, values):
+            if not values["-SESSIONS-"]:
+                sg.popup_error("Please select a session.")
+                return None
+
+            indexes = self.view.window["-SESSIONS-"].get_indexes()
+            
+            if not indexes:
+                return None
+
+            return self.sessions[indexes[0]]
 
     def create_session(self, values):
         name = values["-NAME-"].strip()
@@ -74,12 +104,17 @@ class WorkspaceController:
 
     
     def open_session(self, values):
-        """Open a combined DES window for the selected session."""
+        """Open the DES session selected in the workspace."""
         session = self.get_selected_session(values)
 
         if session is None:
             return
 
+        self.open_des_session(session)
+
+
+    def open_des_session(self, session):
+        """Open a DES window for the supplied session."""
         session_id = str(session.session_id)
 
         if session_id in self.active_des:
@@ -131,6 +166,7 @@ class WorkspaceController:
         """Manage the session browser and all active DES windows."""
         try:
             self.refresh_sessions()
+            self.open_initial_session()
 
             while True:
                 window, event, values = sg.read_all_windows(timeout=100)
