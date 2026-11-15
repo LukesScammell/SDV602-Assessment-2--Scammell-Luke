@@ -12,10 +12,12 @@ MAX_DOCUMENT_BYTES = 15 * 1024 * 1024
 
 
 class DatasetController:
-    def __init__(self, username, session, dataset_repository):
+    def __init__(self, username, session, dataset_repository, graph_callback=None,):
         self.username = username
         self.session = session
         self.repository = dataset_repository
+        self.graph_callback = graph_callback
+
         self.visualiser = DataVisualiser()
         self.view = DatasetView(session.name)
         self.datasets = []
@@ -118,8 +120,17 @@ class DatasetController:
 
             import matplotlib.pyplot as plt
 
-            # Display the graph without blocking the GUI event loop.
-            plt.show(block=False)
+            if self.graph_callback is not None:
+                description = (
+                    f"Dataset: {dataset.name}\n"
+                    f"Records: {len(dataset.records)}\n"
+                    f"X-axis: {x_column} | Y-axis: {y_column}"
+                )
+
+                self.graph_callback(figure, dataset.name, description)
+            else:
+                import matplotlib.pyplot as plt
+                plt.show(block=False)
 
         except (ValueError, TypeError, KeyError) as error:
             sg.popup_error(f"Graph error: {error}")

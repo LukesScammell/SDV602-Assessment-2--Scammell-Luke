@@ -12,13 +12,19 @@ class ChatController:
         self.username = username
         self.session_id = str(session_id)
 
-        self.view = ChatView(session_name)
+        self.view = None
+        self.session_name = session_name
 
         self.results = Queue()
         self.stop_event = threading.Event()
         self.refresh_requested = threading.Event()
 
         self.worker = None
+
+    
+    def attach_view(self, view):
+        """Attach the combined DES window to the chat controller."""
+        self.view = view
 
     def message_worker(self):
         """Retrieve chat messages without blocking the GUI."""
@@ -75,10 +81,14 @@ class ChatController:
         if self.worker is not None:
             self.worker.join(timeout=2)
 
-        self.view.close()
+        if isinstance(self.view, ChatView):
+            self.view.close()
 
     def run(self):
         """Support standalone chat operation."""
+        if self.view is None:
+            self.view = ChatView(self.session_name)
+
         self.start()
 
         try:

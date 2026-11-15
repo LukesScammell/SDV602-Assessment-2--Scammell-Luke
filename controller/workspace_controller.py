@@ -1,10 +1,7 @@
 import FreeSimpleGUI as sg
-import matplotlib.pyplot as plt
 
 from view.workspace_view import WorkspaceView
-from controller.dataset_controller import DatasetController
-from controller.chat_controller import ChatController
-
+from controller.des_controller import DesController
 
 class WorkspaceController:
     def __init__(self, username, session_repository, dataset_repository, message_repository):
@@ -15,8 +12,7 @@ class WorkspaceController:
 
         self.view = WorkspaceView(username)
         self.sessions = []
-        self.active_chats = {}
-        self.active_datasets = {}
+        self.active_des = {}
 
     def refresh_sessions(self):
         self.sessions = self.session_repository.all()
@@ -59,8 +55,8 @@ class WorkspaceController:
         
         session_id = str(session.session_id)
 
-        if (session_id in self.active_chats or session_id in self.active_datasets):
-            sg.popup_error("Close this session's dataset browser and chat before deleting it.")
+        if session_id in self.active_des:
+            sg.popup_error("Close the DES window before deleting this session.")
             return
 
         confirm = sg.popup_yes_no(f"Delete session '{session.name}'?")
@@ -78,6 +74,7 @@ class WorkspaceController:
 
     
     def open_session(self, values):
+        """Open a combined DES window for the selected session."""
         session = self.get_selected_session(values)
 
         if session is None:
@@ -85,23 +82,20 @@ class WorkspaceController:
 
         session_id = str(session.session_id)
 
-        if session_id in self.active_chats:
-            sg.popup("This session's chat is already open.")
+        if session_id in self.active_des:
+            sg.popup("This DES session is already open.")
             return
 
-        if session_id in self.active_datasets:
-            sg.popup("This session's dataset browser is already open.")
-            return
+        des = DesController(self.username, session, self.message_repository, self.dataset_repository)
 
-        dataset = DatasetController(self.username, session, self.dataset_repository)
-
-        self.active_datasets[session_id] = dataset
+        self.active_des[session_id] = des
 
         try:
-            dataset.start()
+            des.start()
+
         except Exception:
-            self.active_datasets.pop(session_id, None)
-            dataset.close()
+            self.active_des.pop(session_id, None)
+            des.close()
             raise
     
 
@@ -126,27 +120,27 @@ class WorkspaceController:
         if chat is not None:
             chat.close()
 
+    def close_des(self, session_id):
+        """Close one DES window and stop its background worker."""
+        des = self.active_des.pop(session_id, None)
+
+        if des is not None:
+            des.close()
     
     def run(self):
+        """Manage the session browser and all active DES windows."""
         try:
             self.refresh_sessions()
 
             while True:
-                window, event, values = sg.read_all_windows(
-                    timeout=100
-                )
+                window, event, values = sg.read_all_windows(timeout=100)
 
-                # Process pending Matplotlib GUI events.
-                plt.pause(0.001)
-
-                # Process incoming chat messages.
-                for chat in list(self.active_chats.values()):
-                    chat.process_results()
+                for des in list(self.active_des.values()):
+                    des.process_results()
 
                 if window is None:
                     continue
 
-                # Workspace events.
                 if window == self.view.window:
                     if event in (sg.WIN_CLOSED, "Exit"):
                         break
@@ -165,43 +159,21 @@ class WorkspaceController:
 
                     continue
 
-                # Dataset browser events.
-                dataset_handled = False
-
-                for session_id, dataset in list(self.active_datasets.items()):
-                    if window == dataset.view.window:
-                        dataset_handled = True
-
-                        if event == sg.WIN_CLOSED:
-                            self.close_dataset(session_id)
-
-                        elif event == "Continue to Chat":
-                            self.close_dataset(session_id, open_chat=True)
-
+                for session_id, des in list(self.active_des.items()):
+                    if window == des.view.window:
+                        if event in (sg.WIN_CLOSED, "Close DES"):
+                            self.close_des(session_id)
                         else:
-                            dataset.handle_event(event, values)
+                            des.handle_event(event, values)
 
                         break
 
-                if dataset_handled:
-                    continue
-
-                # Chat events.
-                for session_id, chat in list(self.active_chats.items()):
-                    if window == chat.view.window:
-                        if event == sg.WIN_CLOSED:
-                            self.close_chat(session_id)
-
-                        else:
-                            chat.handle_event(event, values)
-
+                    if (des.dataset_manager is not None and window == des.dataset_manager.view.window):
+                        des.handle_dataset_event(event, values)
                         break
 
         finally:
-            for session_id in list(self.active_datasets):
-                self.close_dataset(session_id)
-
-            for session_id in list(self.active_chats):
-                self.close_chat(session_id)
+            for session_id in list(self.active_des):
+                self.close_des(session_id)
 
             self.view.close()

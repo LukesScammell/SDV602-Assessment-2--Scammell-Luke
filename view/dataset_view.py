@@ -11,7 +11,7 @@ class DatasetView:
             [sg.Text(f"Session: {session_name}")],
             [sg.Text("Available datasets:")],
             [sg.Listbox(values=[], size=(65, 10), key="-DATASETS-")],
-            [sg.Button("Upload CSV"), sg.Button("Load Dataset"), sg.Button("Refresh"), sg.Button("Continue to Chat")]
+            [sg.Button("Upload CSV"), sg.Button("Load Dataset"), sg.Button("Refresh"), sg.Button("Close")]
         ]
 
         self.window = sg.Window(f"SDV602 - Remote Datasets - {session_name}", layout,finalize=True)
