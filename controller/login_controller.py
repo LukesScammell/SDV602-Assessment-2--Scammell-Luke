@@ -8,7 +8,6 @@ class LoginController:
         self.user_repository = user_repository
         self.view = LoginView()
 
-
     def run(self):
         while True:
             event, values = self.view.read()
@@ -23,14 +22,12 @@ class LoginController:
                 self.view.un_hide()
 
             if event == "Login":
-                user = self.user_repository.login(values["-USERNAME-"], values["-PASSWORD-"])
+                user = self.user_repository.login(
+                    values["-USERNAME-"], values["-PASSWORD-"]
+                )
                 if user:
                     self.view.show_message("Login successful")
                     self.view.close()
                     return user
 
                 self.view.show_error("Login failed")
-
-            
-
-

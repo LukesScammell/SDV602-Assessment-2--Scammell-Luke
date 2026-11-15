@@ -18,7 +18,9 @@ class RegisterController:
 
             if event == "Register":
                 try:
-                    self.user_repository.create_user(values["-USERNAME-"], values["-PASSWORD-"])
+                    self.user_repository.create_user(
+                        values["-USERNAME-"], values["-PASSWORD-"]
+                    )
                     self.view.show_message("Registration successful")
                     self.view.close()
                     return

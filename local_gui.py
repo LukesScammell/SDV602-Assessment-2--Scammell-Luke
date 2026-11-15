@@ -1,6 +1,9 @@
 import FreeSimpleGUI as sg
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk,)
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg,
+    NavigationToolbar2Tk,
+)
 from data_visualiser import DataVisualiser
 
 
@@ -18,17 +21,43 @@ class LocalGUI:
             [sg.Text("Local Data Explorer", font=("Arial", 20))],
             [sg.Text("Welcome to the Local Data Explorer.", key="-STATUS-")],
             [sg.Text("Dataset: No file loaded", key="-DATASET-")],
-            [sg.Multiline("No dataset information available.", key="-DESCRIPTION-", size=(85, 5), disabled=True, autoscroll=True, horizontal_scroll=True, expand_x=True)],
-
-            [sg.Button("Load CSV", key="-LOAD-"), sg.Button("Append CSV", key="-APPEND-"), sg.Button("Show Graph", key="-GRAPH-"), sg.Button("Exit", key="-EXIT-")],
-
-            [sg.Text("X-axis:"), sg.Combo(values=[], key="-X-COLUMN-", size=(25, 1), readonly=True), sg.Text("Y-axis:"), sg.Combo(values=[], key="-Y-COLUMN-", size=(25, 1), readonly=True)],
-
+            [
+                sg.Multiline(
+                    "No dataset information available.",
+                    key="-DESCRIPTION-",
+                    size=(85, 5),
+                    disabled=True,
+                    autoscroll=True,
+                    horizontal_scroll=True,
+                    expand_x=True,
+                )
+            ],
+            [
+                sg.Button("Load CSV", key="-LOAD-"),
+                sg.Button("Append CSV", key="-APPEND-"),
+                sg.Button("Show Graph", key="-GRAPH-"),
+                sg.Button("Exit", key="-EXIT-"),
+            ],
+            [
+                sg.Text("X-axis:"),
+                sg.Combo(
+                    values=[], key="-X-COLUMN-", size=(25, 1), readonly=True
+                ),
+                sg.Text("Y-axis:"),
+                sg.Combo(
+                    values=[], key="-Y-COLUMN-", size=(25, 1), readonly=True
+                ),
+            ],
             [sg.Canvas(key="-TOOLBAR-", size=(760, 40))],
-            [sg.Canvas(key="-CANVAS-", size=(760, 350))]
+            [sg.Canvas(key="-CANVAS-", size=(760, 350))],
         ]
 
-        self.window = sg.Window("SDV602 - Local Data Explorer", self.layout, size=(850, 650), finalize=True)
+        self.window = sg.Window(
+            "SDV602 - Local Data Explorer",
+            self.layout,
+            size=(850, 650),
+            finalize=True,
+        )
 
     def clear_graph(self):
         """Remove the currently displayed graph."""
@@ -49,7 +78,7 @@ class LocalGUI:
         """Update graph column dropdowns using the loaded dataset."""
         data = self.visualiser.get_data()
 
-        if not data: 
+        if not data:
             self.window["-X-COLUMN-"].update(values=[], value="")
             self.window["-Y-COLUMN-"].update(values=[], value="")
             return
@@ -61,13 +90,15 @@ class LocalGUI:
 
         self.window["-X-COLUMN-"].update(values=columns, value=x_default)
         self.window["-Y-COLUMN-"].update(values=columns, value=y_default)
-        
+
     def update_dataset_description(self):
         """Display information about the currently loaded dataset."""
         description = self.visualiser.get_dataset_description()
 
-        if description["records"] == 0: 
-            self.window["-DESCRIPTION-"].update("No dataset information available.") 
+        if description["records"] == 0:
+            self.window["-DESCRIPTION-"].update(
+                "No dataset information available."
+            )
             return
 
         records = description["records"]
@@ -76,19 +107,21 @@ class LocalGUI:
         lines = [f"Total records: {records}", f"Columns: {columns}"]
 
         for column, stats in description["statistics"].items():
-            lines.append(f"{column}: "
+            lines.append(
+                f"{column}: "
                 f"Min = {stats['minimum']:.2f}, "
                 f"Max = {stats['maximum']:.2f}, "
                 f"Average = {stats['average']:.2f}"
             )
-        
-        self.window["-DESCRIPTION-"].update("\n".join(lines)) 
 
-    
+        self.window["-DESCRIPTION-"].update("\n".join(lines))
+
     def load_csv(self, file_name=None):
         """Load a CSV file from the CLI or file selection popup."""
         if file_name is None:
-            file_name = sg.popup_get_file("Select a CSV file", file_types=(("CSV Files", "*.csv")))
+            file_name = sg.popup_get_file(
+                "Select a CSV file", file_types=(("CSV Files", "*.csv"))
+            )
 
         if not file_name:
             return False
@@ -101,13 +134,14 @@ class LocalGUI:
             self.update_dataset_description()
             self.update_column_selection()
 
-            self.window["-STATUS-"].update(f"Successfully loaded {records} records.")
+            self.window["-STATUS-"].update(
+                f"Successfully loaded {records} records."
+            )
             return True
 
         sg.popup_error(f"Unable to load CSV file:\n{file_name}")
         self.window["-STATUS-"].update("Unable to load CSV file.")
         return False
-
 
     def append_csv(self):
         """Append records from another CSV file to the current dataset."""
@@ -115,7 +149,9 @@ class LocalGUI:
             sg.popup_error("Please load a CSV file before appending data.")
             return
 
-        file_name = sg.popup_get_file("Select a CSV file to append", file_types=(("CSV Files", "*.csv")))
+        file_name = sg.popup_get_file(
+            "Select a CSV file to append", file_types=(("CSV Files", "*.csv"))
+        )
 
         if not file_name:
             return
@@ -125,13 +161,17 @@ class LocalGUI:
 
             self.clear_graph()
             self.update_dataset_description()
-            self.window["-STATUS-"].update(f"CSV appended successfully. Total records: {records}.")
+            self.window["-STATUS-"].update(
+                f"CSV appended successfully. Total records: {records}."
+            )
         else:
-            sg.popup_error("Unable to append CSV. Check that the columns match.")
+            sg.popup_error(
+                "Unable to append CSV. Check that the columns match."
+            )
 
     def show_graph(self):
         """Display the loaded dataset as an embedded Matplotlib graph."""
-        data= self.visualiser.get_data()
+        data = self.visualiser.get_data()
 
         if not data:
             sg.popup_error("Please load a CSV file before displaying a graph.")
@@ -141,17 +181,21 @@ class LocalGUI:
         y_column = self.window["-Y-COLUMN-"].get()
 
         if not x_column or not y_column:
-            sg.popup_error("The dataset must contain Period and Count columns.")
+            sg.popup_error(
+                "The dataset must contain Period and Count columns."
+            )
             return
 
         try:
             for row in data:
                 float(row[y_column])
         except (ValueError, TypeError, KeyError):
-            sg.popup_error("The selected Y-axis column must contain numeric values.")
+            sg.popup_error(
+                "The selected Y-axis column must contain numeric values."
+            )
             return
-        
-        self.clear_graph
+
+        self.clear_graph()
 
         try:
             self.figure = self.visualiser.create_line_chart(
@@ -179,15 +223,21 @@ class LocalGUI:
 
         self.figure_canvas = FigureCanvasTkAgg(self.figure, master=canvas)
         self.figure_canvas.draw()
-        self.figure_canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+        self.figure_canvas.get_tk_widget().pack(
+            side="top", fill="both", expand=True
+        )
 
         toolbar_canvas = self.window["-TOOLBAR-"].TKCanvas
 
-        self.toolbar = NavigationToolbar2Tk(self.figure_canvas, toolbar_canvas, pack_toolbar=False)
-        self.toolbar.update() 
+        self.toolbar = NavigationToolbar2Tk(
+            self.figure_canvas, toolbar_canvas, pack_toolbar=False
+        )
+        self.toolbar.update()
         self.toolbar.pack(side="left", fill="x")
 
-        self.window["-STATUS-"].update(f"Graph displayed: {y_column} by {x_column}.")
+        self.window["-STATUS-"].update(
+            f"Graph displayed: {y_column} by {x_column}."
+        )
 
     def run(self):
         """Handle events from the Local Data Explorer window."""

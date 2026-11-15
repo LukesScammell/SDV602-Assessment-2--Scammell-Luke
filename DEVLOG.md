@@ -1073,7 +1073,9 @@ Status: Passed.
 
 Expected result: Users can select a remote dataset and display its records using Matplotlib.
 
-Actual result: Remote
+Actual result: The remote dataset loaded successfully and its records were displayed using Matplotlib.
+
+Status: Passed.
 
 ## Development Entry 18 – 15 November 2026
 
@@ -1117,3 +1119,188 @@ Actual result: Remote
 | Send chat messages with graph open | Chat continues functioning | Messages sent successfully | Passed |
 
 **Status:** Completed and manually tested.
+
+
+## Development Entry 19 – 15 November 2026
+
+### Task: Automated Testing and Headless Test Mode
+
+**Work completed:**
+- Created a `tests` folder to organise automated tests.
+- Added `test_data_visualiser.py` to test CSV loading, appending, validation and graph-related functionality.
+- Added `test_remote_repositories.py` to test remote repository operations.
+- Used mocking to test repository functionality without connecting to MongoDB Atlas.
+- Added a headless Test Mode using Python's `unittest` framework.
+- Implemented `python app.py test` to execute automated tests without opening the GUI.
+- Added support for verbose test output and selecting specific test files.
+- Successfully executed 23 automated tests.
+
+### Challenges Encountered
+
+The application originally relied on manual testing through the graphical interface. This made it difficult to repeatedly verify functionality without opening application windows.
+
+Another challenge was testing MongoDB repository operations without requiring a live database connection.
+
+I resolved these issues by using Python's `unittest` framework and mocking database operations.
+
+### Design Decisions
+
+I decided to keep automated tests in a separate `tests` folder rather than mixing them with the application code.
+
+Mocking was used for repository testing so that tests could run independently of MongoDB Atlas.
+
+I also added a dedicated Test Mode to `app.py`, allowing tests to run directly from the command line.
+
+### Testing
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Run all tests | Execute all automated tests | 23 tests passed | Passed |
+| Visualiser tests | Test local data operations | 8 tests passed | Passed |
+| Repository tests | Test database operations using mocks | 15 tests passed | Passed |
+| Headless execution | Run without opening GUI windows | Tests ran without GUI | Passed |
+| Verbose output | Display individual test results | Detailed results displayed | Passed |
+| Test pattern | Execute selected test files | Selected tests executed | Passed |
+
+**Status:** Completed and tested.
+
+
+## Development Entry 20 – 15 November 2026
+
+### Task: Combined DES Graph and Chat Interface
+
+**Work completed:**
+- Redesigned Remote Mode to display graphs and chat inside the same DES window.
+- Created a `DesController` to manage individual DES sessions.
+- Updated the workspace controller to manage multiple DES windows.
+- Embedded Matplotlib graphs directly inside the DES interface.
+- Added Matplotlib navigation controls for zooming and panning.
+- Integrated session-specific chat into the DES window.
+- Changed dataset management to open in a separate popup window.
+- Preserved background message polling using threads.
+- Updated event handling to support multiple windows simultaneously.
+- Added protection against opening duplicate DES windows for the same session within one application instance.
+
+### Challenges Encountered
+
+The previous implementation displayed chat and graphs in separate windows. This did not fully match the intended DES interface design.
+
+I restructured the application so that each DES window contains both features.
+
+Another challenge involved managing multiple windows without blocking the interface. I retained the shared event loop and background message polling to keep the application responsive.
+
+I also needed to ensure that opening or closing one DES window did not affect another session.
+
+### Design Decisions
+
+I decided to use a separate `DesController` for each active session. This allows each DES window to manage its own graph, dataset and chat messages.
+
+The dataset manager remains a separate popup because it is only needed when selecting or uploading datasets. I also reused the existing `DataVisualiser` functionality rather than creating another graphing system.
+
+### Testing
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Embedded graph | Graph appears inside DES | Displayed correctly | Passed |
+| Zoom | Graph supports zooming | Zoom worked | Passed |
+| Pan | Graph supports panning | Pan worked | Passed |
+| Graph replacement | Existing graph is replaced | Graph replaced correctly | Passed |
+| Multiple DES windows | Both windows remain responsive | Both worked | Passed |
+| Independent graphs | Each session manages its own graph | Graphs remained independent | Passed |
+| Session-specific chat | Messages remain separate | Messages stayed isolated | Passed |
+| Window responsiveness | Other windows remain usable | Windows remained responsive | Passed |
+| Close one DES | Other DES remains open | Other window continued working | Passed |
+
+**Status:** Completed and manually tested.
+
+
+## Development Entry 21 – 15 November 2026
+
+### Task: Mode-Specific Command-Line Arguments
+
+**Work completed:**
+- Updated `app.py` to support Local, Remote and Test modes using `argparse`.
+- Added a `--file` argument to Local Mode.
+- Implemented automatic CSV loading when a filename is supplied.
+- Added a `--session` argument to Remote Mode.
+- Implemented automatic DES session opening after successful login.
+- Added validation for invalid session identifiers in the session repository.
+- Added `--verbose` and `--pattern` arguments to Test Mode.
+- Updated the workspace controller to support opening a requested session.
+- Preserved the existing session browser and multiple DES window functionality.
+
+### Challenges Encountered
+
+While implementing the new command-line arguments, indentation errors occurred in `app.py` and `workspace_controller.py`. These prevented the application from starting correctly.
+
+After correcting the indentation, another error occurred when the workspace controller attempted to call a missing `get_selected_session()` method.
+
+I corrected the controller structure and retested the application.
+
+During Remote Mode testing, login initially failed because the entered username did not match the case-sensitive username stored in MongoDB.
+
+After checking the stored user records, I successfully logged in and continued testing.
+
+### Design Decisions
+
+I decided to use `argparse` subcommands so each application mode could have its own arguments. Local Mode accepts a CSV filename, Remote Mode accepts a session ID, and Test Mode accepts testing options.
+
+I also kept authentication as a requirement before automatically opening a Remote DES session. The existing workspace remains available so users can open additional sessions after login.
+
+### Testing
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Local `--file` | Automatically load CSV | CSV loaded | Passed |
+| Local without argument | Open normal Local GUI | GUI opened | Passed |
+| Missing CSV | Display error without crashing | Error displayed | Passed |
+| Remote `--session` | Open requested DES after login | DES opened | Passed |
+| Open another DES | Both sessions remain available | Both opened | Passed |
+| Duplicate session | Prevent duplicate within same instance | Duplicate prevented | Passed |
+| Test `--verbose` | Show detailed test results | Results displayed | Passed |
+| Test `--pattern` | Run selected tests | Selected tests passed | Passed |
+| Invalid Remote session ID | Display an error without crashing | Error popup displayed and workspace remained open | Passed |
+
+**Status:** Completed and manually tested.
+
+## Final Development Reflection – 15 November 2026
+
+During this assessment, I developed a Data Exploration System using Python, FreeSimpleGUI, Matplotlib and MongoDB Atlas.
+
+I started by extending the tutor's existing code to support local CSV management. I then added an interface for loading datasets, appending records, displaying dataset descriptions and generating interactive graphs.
+
+After completing Local Mode, I implemented Remote Mode with user registration, login, DES session management, dataset uploads and session-based chat.
+
+One of the main challenges was combining different parts of the application while keeping the interface responsive. Initially, graphs, datasets and chat used separate windows. I later redesigned the application so each DES window contains both graphing and chat functionality.
+
+I also encountered errors involving Python imports, indentation, database connections and missing controller methods. I resolved these by reviewing error messages, checking the relevant files and testing each change before continuing.
+
+A major design decision was separating the application into models, views, controllers and repositories. This helped organise the project and made it easier to modify individual features.
+
+Automated testing was another important improvement. I implemented 23 tests using Python's `unittest` framework and mocking, allowing the application's data processing and repository functionality to be tested without opening the GUI or requiring a live database connection.
+
+I also added command-line arguments for Local, Remote and Test modes, making it easier to launch the application with different settings.
+
+If I continued developing this project, I would improve the interface layout, expand the automated tests and add more graph types. I would also improve error handling and provide clearer feedback when remote database operations fail.
+
+Overall, this assessment helped me improve my understanding of Python application architecture, graphical interfaces, database integration, multithreading, automated testing and Git version control.
+
+### Final Code Review and Validation
+
+**Work completed:**
+- Formatted the Python files using Ruff with a 79-character line length.
+- Checked the application against selected Ruff linting rules and PEP 8 formatting requirements.
+- Corrected a missing method call in `local_gui.py` so that the existing graph is cleared before displaying another graph.
+- Removed an unnecessary nested method definition from `controller/workspace_controller.py`.
+- Reran all 23 automated tests after making the corrections.
+
+### Testing
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Ruff linting | No errors for selected rules | All checks passed | Passed |
+| PEP 8 validation | No formatting warnings | No warnings reported | Passed |
+| Automated regression tests | All tests pass after code changes | 23 tests passed | Passed |
+| Git whitespace validation | No whitespace errors | No errors reported | Passed |
+
+These checks helped confirm that the final code changes did not introduce failures in the existing automated tests.

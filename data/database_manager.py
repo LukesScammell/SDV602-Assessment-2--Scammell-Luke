@@ -4,7 +4,6 @@ import config
 
 
 class DatabaseManager:
-
     _instance = None
 
     def __init__(self):
@@ -25,6 +24,6 @@ class DatabaseManager:
 
     def find_one_by_id(self, collection, id):
         return self.get_collection(collection).find_one({"_id": ObjectId(id)})
-    
+
     def find_one_by_name(self, collection, name):
         return self.get_collection(collection).find_one({"name": name})

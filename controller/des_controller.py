@@ -1,4 +1,3 @@
-
 import FreeSimpleGUI as sg
 
 from controller.chat_controller import ChatController
@@ -9,14 +8,18 @@ from view.des_view import DesView
 class DesController:
     """Coordinate the combined DES window, chat and datasets."""
 
-    def __init__(self, username, session, message_repository, dataset_repository):
+    def __init__(
+        self, username, session, message_repository, dataset_repository
+    ):
         self.username = username
         self.session = session
         self.dataset_repository = dataset_repository
 
         self.view = DesView(session.name, username)
 
-        self.chat = ChatController(username, message_repository, session.session_id, session.name)
+        self.chat = ChatController(
+            username, message_repository, session.session_id, session.name
+        )
         self.chat.attach_view(self.view)
 
         self.dataset_manager = None
@@ -39,11 +42,16 @@ class DesController:
             sg.popup("The dataset manager is already open.")
             return
 
-        manager = DatasetController(self.username, self.session, self.dataset_repository, graph_callback=self.update_graph)
+        manager = DatasetController(
+            self.username,
+            self.session,
+            self.dataset_repository,
+            graph_callback=self.update_graph,
+        )
 
         try:
             manager.start()
-            
+
         except Exception:
             manager.close()
             raise

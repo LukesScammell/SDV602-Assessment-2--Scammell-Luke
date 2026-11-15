@@ -48,7 +48,7 @@ class FileManager:
         """Reads a CSV file :)"""
         data = []
         try:
-            with open(file_name, mode='r') as file:
+            with open(file_name, mode="r") as file:
                 reader = csv.DictReader(file)
 
                 for row in reader:

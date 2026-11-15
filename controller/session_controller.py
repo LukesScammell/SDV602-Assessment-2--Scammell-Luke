@@ -66,10 +66,14 @@ class SessionController:
 
                 if session:
                     if session.owner != self.username:
-                        sg.popup_error("You can only delete your own sessions.")
+                        sg.popup_error(
+                            "You can only delete your own sessions."
+                        )
                         continue
 
-                    confirm = sg.popup_yes_no(f"Delete session '{session.name}'?")
+                    confirm = sg.popup_yes_no(
+                        f"Delete session '{session.name}'?"
+                    )
 
                     if confirm == "Yes":
                         deleted = self.session_repository.delete_session(

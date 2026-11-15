@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from bson import ObjectId
+from bson.errors import InvalidId
 
 import config
 from data.database_manager import DatabaseManager
@@ -29,9 +30,7 @@ class DatasetRepository:
 
         columns = set(records[0].keys())
 
-        if not columns or any(
-            set(row.keys()) != columns for row in records
-        ):
+        if not columns or any(set(row.keys()) != columns for row in records):
             raise ValueError("Dataset columns must match.")
 
         document = {
@@ -47,27 +46,25 @@ class DatasetRepository:
     def all_for_session(self, session_id):
         collection = self.db.get_collection(config.DATA_SOURCES_COLLECTION)
 
-        documents = collection.find({
-            "session_id": str(session_id),
-        }).sort("uploaded_at", -1)
+        documents = collection.find({"session_id": str(session_id)}).sort(
+            "uploaded_at", -1
+        )
 
         return [
-            RemoteDataset.from_document(document)
-            for document in documents
+            RemoteDataset.from_document(document) for document in documents
         ]
 
     def find_by_id(self, dataset_id, session_id):
         try:
             object_id = ObjectId(str(dataset_id))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, InvalidId):
             return None
 
         collection = self.db.get_collection(config.DATA_SOURCES_COLLECTION)
 
-        document = collection.find_one({
-            "_id": object_id,
-            "session_id": str(session_id),
-        })
+        document = collection.find_one(
+            {"_id": object_id, "session_id": str(session_id)}
+        )
 
         if document is None:
             return None

@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+from bson.errors import InvalidId
+
 import config
 
 from data.database_manager import DatabaseManager
@@ -27,34 +29,25 @@ class SessionRepository:
             "created_at": datetime.now(timezone.utc),
         }
 
-        return self.db.insert_one(
-            config.SESSIONS_COLLECTION,
-            document,
-        )
+        return self.db.insert_one(config.SESSIONS_COLLECTION, document)
 
     def all(self):
-        collection = self.db.get_collection(
-            config.SESSIONS_COLLECTION
-        )
+        collection = self.db.get_collection(config.SESSIONS_COLLECTION)
 
         documents = collection.find().sort("created_at", -1)
 
-        return [
-            DesSession.from_document(document)
-            for document in documents
-        ]
+        return [DesSession.from_document(document) for document in documents]
 
     def find_by_id(self, session_id):
         from bson import ObjectId
 
         try:
             object_id = ObjectId(session_id)
-        except (TypeError, ValueError):
+
+        except (TypeError, ValueError, InvalidId):
             return None
 
-        collection = self.db.get_collection(
-            config.SESSIONS_COLLECTION
-        )
+        collection = self.db.get_collection(config.SESSIONS_COLLECTION)
 
         document = collection.find_one({"_id": object_id})
 
@@ -68,16 +61,12 @@ class SessionRepository:
 
         try:
             object_id = ObjectId(session_id)
-        except (TypeError, ValueError):
+
+        except (TypeError, ValueError, InvalidId):
             return False
 
-        collection = self.db.get_collection(
-            config.SESSIONS_COLLECTION
-        )
+        collection = self.db.get_collection(config.SESSIONS_COLLECTION)
 
-        result = collection.delete_one({
-            "_id": object_id,
-            "owner": username,
-        })
+        result = collection.delete_one({"_id": object_id, "owner": username})
 
         return result.deleted_count == 1

@@ -8,10 +8,29 @@ class SessionView:
         layout = [
             [sg.Text("DES Session Browser", font=("Arial", 20))],
             [sg.Text("Select an existing session or create a new one.")],
-            [sg.Listbox(values=[], size=(60, 10),key="-SESSIONS-", enable_events=True,)],
-            [sg.Text("Session name:", size=(15, 1)), sg.Input(key="-NAME-", size=(35, 1))],
-            [sg.Text("Description:", size=(15, 1)), sg.Input(key="-DESCRIPTION-", size=(35, 1))],
-            [sg.Button("Create"), sg.Button("Join"), sg.Button("Delete"), sg.Button("Refresh"), sg.Button("Exit")]
+            [
+                sg.Listbox(
+                    values=[],
+                    size=(60, 10),
+                    key="-SESSIONS-",
+                    enable_events=True,
+                )
+            ],
+            [
+                sg.Text("Session name:", size=(15, 1)),
+                sg.Input(key="-NAME-", size=(35, 1)),
+            ],
+            [
+                sg.Text("Description:", size=(15, 1)),
+                sg.Input(key="-DESCRIPTION-", size=(35, 1)),
+            ],
+            [
+                sg.Button("Create"),
+                sg.Button("Join"),
+                sg.Button("Delete"),
+                sg.Button("Refresh"),
+                sg.Button("Exit"),
+            ],
         ]
 
         self.window = sg.Window("SDV602 - DES Sessions", layout, finalize=True)

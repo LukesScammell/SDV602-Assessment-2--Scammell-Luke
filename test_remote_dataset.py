@@ -16,7 +16,12 @@ def main():
     records = visualiser.get_data()
 
     try:
-        dataset_id = repository.upload_dataset(name="Remote CSV Test", session_id=session_id, uploaded_by="Luke", records=records)
+        dataset_id = repository.upload_dataset(
+            name="Remote CSV Test",
+            session_id=session_id,
+            uploaded_by="Luke",
+            records=records,
+        )
 
         print("Dataset uploaded successfully.")
         print(f"Dataset ID: {dataset_id}")

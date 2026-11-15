@@ -6,13 +6,18 @@ from bson import BSON
 from data_visualiser import DataVisualiser
 from view.dataset_view import DatasetView
 
-
 MAX_CSV_BYTES = 10 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 15 * 1024 * 1024
 
 
 class DatasetController:
-    def __init__(self, username, session, dataset_repository, graph_callback=None,):
+    def __init__(
+        self,
+        username,
+        session,
+        dataset_repository,
+        graph_callback=None,
+    ):
         self.username = username
         self.session = session
         self.repository = dataset_repository
@@ -23,11 +28,15 @@ class DatasetController:
         self.datasets = []
 
     def refresh_datasets(self):
-        self.datasets = self.repository.all_for_session(self.session.session_id)
+        self.datasets = self.repository.all_for_session(
+            self.session.session_id
+        )
         self.view.update_datasets(self.datasets)
 
     def upload_csv(self):
-        file_path = sg.popup_get_file("Select a CSV dataset", file_types=[("CSV Files", "*.csv")])
+        file_path = sg.popup_get_file(
+            "Select a CSV dataset", file_types=[("CSV Files", "*.csv")]
+        )
 
         if not file_path:
             return
@@ -58,7 +67,12 @@ class DatasetController:
                 sg.popup_error("Dataset is too large for MongoDB.")
                 return
 
-            self.repository.upload_dataset(name=path.stem, session_id=self.session.session_id, uploaded_by=self.username,records=records)
+            self.repository.upload_dataset(
+                name=path.stem,
+                session_id=self.session.session_id,
+                uploaded_by=self.username,
+                records=records,
+            )
 
             self.refresh_datasets()
             sg.popup("Dataset uploaded successfully.")
@@ -79,7 +93,9 @@ class DatasetController:
 
         selected_dataset = self.datasets[selected_index]
 
-        dataset = self.repository.find_by_id(selected_dataset.dataset_id, self.session.session_id)
+        dataset = self.repository.find_by_id(
+            selected_dataset.dataset_id, self.session.session_id
+        )
 
         if dataset is None:
             sg.popup_error("Dataset could not be found.")
@@ -112,13 +128,13 @@ class DatasetController:
             return
 
         try:
-            figure = self.visualiser.create_line_chart(x_column, y_column, dataset.name)
+            figure = self.visualiser.create_line_chart(
+                x_column, y_column, dataset.name
+            )
 
             if figure is None:
                 sg.popup_error("Unable to create graph.")
                 return
-
-            import matplotlib.pyplot as plt
 
             if self.graph_callback is not None:
                 description = (
@@ -130,11 +146,11 @@ class DatasetController:
                 self.graph_callback(figure, dataset.name, description)
             else:
                 import matplotlib.pyplot as plt
+
                 plt.show(block=False)
 
         except (ValueError, TypeError, KeyError) as error:
             sg.popup_error(f"Graph error: {error}")
-    
 
     def start(self):
         """Prepare the dataset browser without starting a blocking loop."""
@@ -154,26 +170,3 @@ class DatasetController:
     def close(self):
         """Close the dataset browser window."""
         self.view.close()
-
-
-    def run(self):
-        try:
-            self.refresh_datasets()
-
-            while True:
-                event, values = self.view.read()
-
-                if event in (sg.WIN_CLOSED, "Continue to Chat"):
-                    break
-
-                if event == "Refresh":
-                    self.refresh_datasets()
-
-                elif event == "Upload CSV":
-                    self.upload_csv()
-
-                elif event == "Load Dataset":
-                    self.load_dataset(values)
-
-        finally:
-            self.view.close()

@@ -6,8 +6,15 @@ import FreeSimpleGUI as sg
 import config
 from view.chat_view import ChatView
 
+
 class ChatController:
-    def __init__(self, username, message_repository, session_id, session_name="Live Chat"):
+    def __init__(
+        self,
+        username,
+        message_repository,
+        session_id,
+        session_name="Live Chat",
+    ):
         self.message_repository = message_repository
         self.username = username
         self.session_id = str(session_id)
@@ -21,7 +28,6 @@ class ChatController:
 
         self.worker = None
 
-    
     def attach_view(self, view):
         """Attach the combined DES window to the chat controller."""
         self.view = view
@@ -39,10 +45,14 @@ class ChatController:
 
             self.refresh_requested.wait(timeout=config.POLL_RATE / 1000)
             self.refresh_requested.clear()
-    
+
     def start(self):
         """Start background polling without blocking the GUI."""
-        self.worker = threading.Thread(target=self.message_worker, name=f"Chat-{self.session_id}", daemon=True)
+        self.worker = threading.Thread(
+            target=self.message_worker,
+            name=f"Chat-{self.session_id}",
+            daemon=True,
+        )
         self.worker.start()
 
     def process_results(self):
@@ -66,7 +76,9 @@ class ChatController:
 
             if message.strip():
                 try:
-                    self.message_repository.create_message(self.username, message, self.session_id)
+                    self.message_repository.create_message(
+                        self.username, message, self.session_id
+                    )
                     self.view.clear_input()
                     self.refresh_requested.set()
 

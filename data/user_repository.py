@@ -2,23 +2,25 @@ from data.database_manager import DatabaseManager
 import bcrypt
 import config
 
-from model.user import User  
+from model.user import User
 
 
 class UserRepository:
     def __init__(self):
         self.db = DatabaseManager.getInstance()
 
-    def login(self, username, password):    
-        if not type(password) == str or not password:
+    def login(self, username, password):
+        if not isinstance(password, str) or not password:
             raise Exception("Invalid Password")
 
         try:
             # get user by name
-            stored_user = self.db.find_one_by_name(config.USER_COLLECTION, username)
+            stored_user = self.db.find_one_by_name(
+                config.USER_COLLECTION, username
+            )
             if not stored_user:
                 raise Exception("Failed to find user")
-            
+
             # compare pw
             password_encoded = password.encode("utf-8")
             # print(stored_user["password"])
@@ -31,11 +33,11 @@ class UserRepository:
             return User(username, password)
         except Exception as e:
             print(f"Something went wrong: {e}")
-    
+
     def create_user(self, username, password):
         if self.db.find_one_by_name(config.USER_COLLECTION, username):
             raise Exception("Username already taken")
-        
+
         password_hash = None
         try:
             password_encoded = password.encode("utf-8")
@@ -47,8 +49,7 @@ class UserRepository:
         except Exception as e:
             print(f"Something went wrong: {e}")
 
-        return self.db.insert_one(config.USER_COLLECTION, {
-            "name": username,
-            "password": password_hash
-        })
-    
+        return self.db.insert_one(
+            config.USER_COLLECTION,
+            {"name": username, "password": password_hash},
+        )

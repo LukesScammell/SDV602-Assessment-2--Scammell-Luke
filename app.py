@@ -24,7 +24,13 @@ class App:
         if not user:
             return
 
-        workspace = WorkspaceController(user.name, self.session_repository, self.dataset_repository, self.message_repository, initial_session_id=session_id)
+        workspace = WorkspaceController(
+            user.name,
+            self.session_repository,
+            self.dataset_repository,
+            self.message_repository,
+            initial_session_id=session_id,
+        )
         workspace.run()
 
 
@@ -49,30 +55,52 @@ def run_tests(verbose=False, pattern="test_*.py"):
     """Run headless automated tests."""
     import unittest
 
-    suite = unittest.defaultTestLoader.discover(start_dir="tests", pattern=pattern)
+    suite = unittest.defaultTestLoader.discover(
+        start_dir="tests", pattern=pattern
+    )
 
     verbosity = 2 if verbose else 1
 
-    result = unittest.TextTestRunner(verbosity=verbosity,).run(suite)
+    result = unittest.TextTestRunner(
+        verbosity=verbosity,
+    ).run(suite)
 
     return 0 if result.wasSuccessful() else 1
 
 
 def main():
     """Parse command-line arguments and launch the selected mode."""
-    parser = argparse.ArgumentParser(description="SDV602 Data Exploration System")
+    parser = argparse.ArgumentParser(
+        description="SDV602 Data Exploration System"
+    )
 
-    subparsers = parser.add_subparsers(dest="mode", help="Select an application mode")
+    subparsers = parser.add_subparsers(
+        dest="mode", help="Select an application mode"
+    )
 
-    local_parser = subparsers.add_parser("local", help="Launch the local CSV explorer")
-    local_parser.add_argument("--file", help="CSV file to load when starting Local Mode")
+    local_parser = subparsers.add_parser(
+        "local", help="Launch the local CSV explorer"
+    )
+    local_parser.add_argument(
+        "--file", help="CSV file to load when starting Local Mode"
+    )
 
-    remote_parser = subparsers.add_parser("remote", help="Launch the remote DES workspace")
-    remote_parser.add_argument("--session", help="DES session ID to open after login")
+    remote_parser = subparsers.add_parser(
+        "remote", help="Launch the remote DES workspace"
+    )
+    remote_parser.add_argument(
+        "--session", help="DES session ID to open after login"
+    )
 
-    test_parser = subparsers.add_parser("test", help="Run automated tests without opening the GUI")
-    test_parser.add_argument("--verbose", action="store_true", help="Display detailed test results")
-    test_parser.add_argument("--pattern", default="test_*.py", help="Test filename pattern")
+    test_parser = subparsers.add_parser(
+        "test", help="Run automated tests without opening the GUI"
+    )
+    test_parser.add_argument(
+        "--verbose", action="store_true", help="Display detailed test results"
+    )
+    test_parser.add_argument(
+        "--pattern", default="test_*.py", help="Test filename pattern"
+    )
 
     args = parser.parse_args()
 

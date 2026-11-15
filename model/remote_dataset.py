@@ -1,5 +1,13 @@
 class RemoteDataset:
-    def __init__(self, name, session_id, uploaded_by, records, dataset_id=None, uploaded_at=None):
+    def __init__(
+        self,
+        name,
+        session_id,
+        uploaded_by,
+        records,
+        dataset_id=None,
+        uploaded_at=None,
+    ):
         self.dataset_id = dataset_id
         self.name = name
         self.session_id = str(session_id)

@@ -2,7 +2,14 @@ from datetime import datetime, timezone
 
 
 class DesSession:
-    def __init__(self, name, owner, description="", session_id=None, created_at=None,):
+    def __init__(
+        self,
+        name,
+        owner,
+        description="",
+        session_id=None,
+        created_at=None,
+    ):
         self.session_id = session_id
         self.name = name
         self.owner = owner

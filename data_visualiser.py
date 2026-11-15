@@ -34,7 +34,7 @@ class DataVisualiser:
             return False
 
         self.data = [row.copy() for row in records]
-        return True   
+        return True
 
     def read_csv_safely(self, file_name):
         """Read a CSV file and handle common file errors."""
@@ -75,11 +75,7 @@ class DataVisualiser:
     def get_dataset_description(self):
         """Return record counts, column names and numerical statistics."""
         if not self.data:
-            return {
-                "records": 0,
-                "columns": [],
-                "statistics": {}
-            }
+            return {"records": 0, "columns": [], "statistics": {}}
 
         columns = list(self.data[0].keys())
         statistics = {}
@@ -103,13 +99,13 @@ class DataVisualiser:
                 statistics[column] = {
                     "minimum": min(values),
                     "maximum": max(values),
-                    "average": sum(values) / len(values)
+                    "average": sum(values) / len(values),
                 }
 
         return {
             "records": len(self.data),
             "columns": columns,
-            "statistics": statistics
+            "statistics": statistics,
         }
 
     def create_line_chart(self, x_key, y_key, title, series_key=None):
@@ -150,12 +146,7 @@ class DataVisualiser:
 
             y_values = [float(row[y_key]) for row in rows]
 
-            ax.plot(
-                x_values,
-                y_values,
-                marker="o",
-                label=name
-            )
+            ax.plot(x_values, y_values, marker="o", label=name)
 
         if series_key:
             ax.legend()

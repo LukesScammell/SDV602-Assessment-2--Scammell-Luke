@@ -1,7 +1,10 @@
 import FreeSimpleGUI as sg
 import matplotlib.pyplot as plt
 
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg,
+    NavigationToolbar2Tk,
+)
 from matplotlib.figure import Figure
 
 
@@ -22,23 +25,52 @@ class DesView:
             [sg.Text("No dataset loaded", key="-DATASET-", size=(55, 1))],
             [sg.Canvas(key="-TOOLBAR-", size=(650, 40))],
             [sg.Canvas(key="-GRAPH-CANVAS-", size=(650, 400))],
-            [sg.Text("Select a dataset to display its graph.", key="-DESCRIPTION-", size=(65, 3))],
+            [
+                sg.Text(
+                    "Select a dataset to display its graph.",
+                    key="-DESCRIPTION-",
+                    size=(65, 3),
+                )
+            ],
         ]
 
         chat_column = [
             [sg.Text("Live Chat", font=("Arial", 16))],
-            [sg.Multiline(size=(35, 22), disabled=True, autoscroll=True, key="-OUTPUT-")],
-            [sg.Input(size=(27, 1), key="-CHAT-", do_not_clear=True), sg.Button("Send", bind_return_key=True)],
+            [
+                sg.Multiline(
+                    size=(35, 22),
+                    disabled=True,
+                    autoscroll=True,
+                    key="-OUTPUT-",
+                )
+            ],
+            [
+                sg.Input(size=(27, 1), key="-CHAT-", do_not_clear=True),
+                sg.Button("Send", bind_return_key=True),
+            ],
         ]
 
         layout = [
             [sg.Text(f"DES Session: {session_name}", font=("Arial", 20))],
             [sg.Text(f"Logged in as: {username}")],
-            [sg.Button("Manage Data Sources"), sg.Button("Refresh Chat"), sg.Button("Close DES")],
-            [sg.Column(graph_column, vertical_alignment="top"), sg.VSeparator(), sg.Column(chat_column, vertical_alignment="top")],
+            [
+                sg.Button("Manage Data Sources"),
+                sg.Button("Refresh Chat"),
+                sg.Button("Close DES"),
+            ],
+            [
+                sg.Column(graph_column, vertical_alignment="top"),
+                sg.VSeparator(),
+                sg.Column(chat_column, vertical_alignment="top"),
+            ],
         ]
 
-        self.window = sg.Window(f"SDV602 - DES - {session_name}", layout, finalize=True, resizable=True)
+        self.window = sg.Window(
+            f"SDV602 - DES - {session_name}",
+            layout,
+            finalize=True,
+            resizable=True,
+        )
         self.show_placeholder()
 
     def display_figure(self, figure):
@@ -50,11 +82,15 @@ class DesView:
 
         self.figure_canvas = FigureCanvasTkAgg(figure, master=canvas)
         self.figure_canvas.draw()
-        self.figure_canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+        self.figure_canvas.get_tk_widget().pack(
+            side="top", fill="both", expand=True
+        )
 
         toolbar_canvas = self.window["-TOOLBAR-"].TKCanvas
 
-        self.toolbar = NavigationToolbar2Tk(self.figure_canvas, toolbar_canvas, pack_toolbar=False)
+        self.toolbar = NavigationToolbar2Tk(
+            self.figure_canvas, toolbar_canvas, pack_toolbar=False
+        )
         self.toolbar.update()
         self.toolbar.pack(side="top", fill="x")
 
@@ -80,7 +116,15 @@ class DesView:
         axes.set_title("Data Exploration System")
         axes.set_xlabel("X-axis")
         axes.set_ylabel("Y-axis")
-        axes.text(0.5, 0.5, "No dataset loaded\nSelect Manage Data Sources", ha="center", va="center", transform=axes.transAxes, fontsize=12)
+        axes.text(
+            0.5,
+            0.5,
+            "No dataset loaded\nSelect Manage Data Sources",
+            ha="center",
+            va="center",
+            transform=axes.transAxes,
+            fontsize=12,
+        )
 
         figure.tight_layout()
 

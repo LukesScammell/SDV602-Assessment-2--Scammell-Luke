@@ -2,24 +2,32 @@ import FreeSimpleGUI as sg
 
 
 class ChatView:
-
     def __init__(self, session_name="Live Chat"):
         sg.theme("DarkBlue")
 
         self.layout = [
-            [sg.Multiline(size=(50, 20), disabled=True, autoscroll=True, key='-OUTPUT-')],
-            [sg.Input(size=(40, 5), key='-CHAT-', do_not_clear=True)],
-            [sg.Button('Send', bind_return_key=True)]
+            [
+                sg.Multiline(
+                    size=(50, 20),
+                    disabled=True,
+                    autoscroll=True,
+                    key="-OUTPUT-",
+                )
+            ],
+            [sg.Input(size=(40, 5), key="-CHAT-", do_not_clear=True)],
+            [sg.Button("Send", bind_return_key=True)],
         ]
 
-        self.window = sg.Window(f"SDV602 - {session_name}", self.layout, finalize=True)
+        self.window = sg.Window(
+            f"SDV602 - {session_name}", self.layout, finalize=True
+        )
 
     def update_messages(self, text):
         formatted = self.format_messages(text)
-        self.window['-OUTPUT-'].update(formatted)
+        self.window["-OUTPUT-"].update(formatted)
 
     def clear_input(self):
-        self.window['-CHAT-'].update('')
+        self.window["-CHAT-"].update("")
 
     def read(self, timeout=None):
         return self.window.read(timeout=timeout)
@@ -32,7 +40,7 @@ class ChatView:
 
     def show_message(self, message):
         sg.popup(message)
-    
+
     def format_messages(self, messages=[]):
         if messages:
             output = ""
