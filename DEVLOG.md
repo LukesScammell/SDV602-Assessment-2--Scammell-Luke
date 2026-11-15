@@ -1074,3 +1074,46 @@ Status: Passed.
 Expected result: Users can select a remote dataset and display its records using Matplotlib.
 
 Actual result: Remote
+
+## Development Entry 18 – 15 November 2026
+
+**Task:** Implement multiple DES sessions, background threading, and non-blocking graph display.
+
+**Work completed:**
+- Implemented background message polling using Python threads, queues, and threading events.
+- Updated the chat controller to retrieve messages in a background thread while keeping GUI updates on the main thread.
+- Updated the workspace controller to manage multiple active DES chat windows within a single application.
+- Used `sg.read_all_windows()` to process events from the workspace, chat windows, and dataset browsers.
+- Added protection against opening duplicate chat windows for the same DES session.
+- Updated dataset controllers to handle individual events without blocking other application windows.
+- Added support for opening multiple dataset browsers simultaneously.
+- Updated Matplotlib graph display to use `plt.show(block=False)` and `plt.pause(0.001)` so graphs remain interactive alongside other windows.
+
+**Challenges:**
+- The original dataset browser used a blocking event loop, preventing other application windows from responding while it was open.
+- Encountered `NameError` and `AttributeError` exceptions while restructuring chat controller creation.
+- Matplotlib's original `plt.show()` behaviour blocked the application until the graph window closed.
+
+**Design Decisions:**
+- Used one shared GUI event loop to manage multiple windows instead of creating separate GUI threads.
+- Kept chat message retrieval in background threads to avoid blocking the interface during polling.
+- Used a separate controller for each active chat and dataset browser to maintain session independence.
+- Retained the existing MVC structure and MongoDB dataset functionality.
+- Used non-blocking Matplotlib display rather than introducing a new graph window implementation.
+
+**Testing:**
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Open two DES chats | Both remain responsive | Both opened and worked | Passed |
+| Send messages in different sessions | Messages remain session-specific | Messages remained separate | Passed |
+| Close one chat | Other chat remains active | Other chat continued working | Passed |
+| Reopen a session | Previous messages are retrieved | Messages were retrieved | Passed |
+| Open duplicate chat | Duplicate window is prevented | Warning displayed | Passed |
+| Open multiple dataset browsers | Both remain responsive | Both worked simultaneously | Passed |
+| Upload and refresh datasets | Session datasets update correctly | Upload and refresh worked | Passed |
+| Open graph without blocking | Other windows remain responsive | Graph and windows worked | Passed |
+| Use graph zoom/pan | Graph remains interactive | Zoom and pan worked | Passed |
+| Send chat messages with graph open | Chat continues functioning | Messages sent successfully | Passed |
+
+**Status:** Completed and manually tested.

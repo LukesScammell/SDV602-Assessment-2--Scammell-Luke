@@ -1,3 +1,4 @@
+
 import FreeSimpleGUI as sg
 
 
@@ -10,10 +11,10 @@ class DatasetView:
             [sg.Text(f"Session: {session_name}")],
             [sg.Text("Available datasets:")],
             [sg.Listbox(values=[], size=(65, 10), key="-DATASETS-")],
-            [sg.Button("Upload CSV"), sg.Button("Load Dataset"), sg.Button("Refresh"), sg.Button("Continue to Chat")],
+            [sg.Button("Upload CSV"), sg.Button("Load Dataset"), sg.Button("Refresh"), sg.Button("Continue to Chat")]
         ]
 
-        self.window = sg.Window("SDV602 - Remote Datasets",layout,finalize=True)
+        self.window = sg.Window(f"SDV602 - Remote Datasets - {session_name}", layout,finalize=True)
 
     def update_datasets(self, datasets):
         self.window["-DATASETS-"].update(
@@ -24,8 +25,8 @@ class DatasetView:
             ]
         )
 
-    def read(self):
-        return self.window.read()
+    def read(self, timeout=None):
+        return self.window.read(timeout=timeout)
 
     def close(self):
         self.window.close()

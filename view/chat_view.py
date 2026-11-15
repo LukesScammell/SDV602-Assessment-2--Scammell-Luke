@@ -3,17 +3,16 @@ import FreeSimpleGUI as sg
 
 class ChatView:
 
-    def __init__(self):
+    def __init__(self, session_name="Live Chat"):
         sg.theme("DarkBlue")
 
         self.layout = [
-            [sg.Multiline(size=(50, 20), disabled=True,
-                          autoscroll=True, key='-OUTPUT-')],
+            [sg.Multiline(size=(50, 20), disabled=True, autoscroll=True, key='-OUTPUT-')],
             [sg.Input(size=(40, 5), key='-CHAT-', do_not_clear=True)],
             [sg.Button('Send', bind_return_key=True)]
         ]
 
-        self.window = sg.Window("Live Chat", self.layout, finalize=True)
+        self.window = sg.Window(f"SDV602 - {session_name}", self.layout, finalize=True)
 
     def update_messages(self, text):
         formatted = self.format_messages(text)

@@ -73,9 +73,7 @@ class DatasetController:
             sg.popup_error("Please select a dataset.")
             return
 
-        selected_index = self.view.window[
-            "-DATASETS-"
-        ].get_indexes()[0]
+        selected_index = self.view.window["-DATASETS-"].get_indexes()[0]
 
         selected_dataset = self.datasets[selected_index]
 
@@ -119,11 +117,33 @@ class DatasetController:
                 return
 
             import matplotlib.pyplot as plt
-            plt.show()
-            plt.close(figure)
+
+            # Display the graph without blocking the GUI event loop.
+            plt.show(block=False)
 
         except (ValueError, TypeError, KeyError) as error:
             sg.popup_error(f"Graph error: {error}")
+    
+
+    def start(self):
+        """Prepare the dataset browser without starting a blocking loop."""
+        self.refresh_datasets()
+
+    def handle_event(self, event, values):
+        """Handle one dataset browser event."""
+        if event == "Refresh":
+            self.refresh_datasets()
+
+        elif event == "Upload CSV":
+            self.upload_csv()
+
+        elif event == "Load Dataset":
+            self.load_dataset(values)
+
+    def close(self):
+        """Close the dataset browser window."""
+        self.view.close()
+
 
     def run(self):
         try:
